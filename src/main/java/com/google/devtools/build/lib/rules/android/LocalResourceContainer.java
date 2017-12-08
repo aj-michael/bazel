@@ -118,7 +118,7 @@ public final class LocalResourceContainer {
   private static void validateNoAndroidResourcesInSources(RuleContext ruleContext)
       throws RuleErrorException {
     Iterable<AndroidResourcesProvider> resources =
-        ruleContext.getPrerequisites("srcs", Mode.TARGET, AndroidResourcesProvider.class);
+        ruleContext.getPrerequisites("srcs", Mode.TARGET, AndroidResourcesProvider.PROVIDER);
     for (AndroidResourcesProvider provider : resources) {
       ruleContext.throwWithAttributeError("srcs",
           String.format("srcs should not contain android_resource label %s", provider.getLabel()));

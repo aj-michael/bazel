@@ -264,7 +264,7 @@ public final class ResourceDependencies {
         continue;
       }
       for (AndroidResourcesProvider resources :
-          ruleContext.getPrerequisites(attr, Mode.TARGET, AndroidResourcesProvider.class)) {
+          ruleContext.getPrerequisites(attr, Mode.TARGET, AndroidResourcesProvider.PROVIDER)) {
         builderForTransitive.addTransitive(resources.getTransitiveAndroidResources());
         builderForDirect.addTransitive(resources.getDirectAndroidResources());
         transitiveResources.addTransitive(resources.getTransitiveResources());

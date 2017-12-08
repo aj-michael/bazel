@@ -808,8 +808,7 @@ public class AndroidCommon {
             JavaRuntimeJarProvider.class,
             new JavaRuntimeJarProvider(javaCommon.getJavaCompilationArtifacts().getRuntimeJars()))
         .addProvider(RunfilesProvider.class, RunfilesProvider.simple(getRunfiles()))
-        .addProvider(
-            AndroidResourcesProvider.class,
+        .addNativeDeclaredProvider(
             resourceApk.toResourceProvider(ruleContext.getLabel(), isResourcesOnly))
         .addProvider(
             AndroidIdeInfoProvider.class,
@@ -853,18 +852,16 @@ public class AndroidCommon {
     if (!ruleContext.attributes().has("resources", BuildType.LABEL)) {
       return null;
     }
-    TransitiveInfoCollection prerequisite = ruleContext.getPrerequisite("resources", Mode.TARGET);
-    if (prerequisite == null) {
+    AndroidResourcesProvider provider =
+        ruleContext.getPrerequisite("resources", Mode.TARGET, AndroidResourcesProvider.PROVIDER);
+    if (provider == null) {
       return null;
     }
-
-    AndroidResourcesProvider provider = prerequisite.getProvider(AndroidResourcesProvider.class);
 
     if (!provider.getIsResourcesOnly()) {
       ruleContext.attributeError(
           "resources",
-          "android_library target "
-              + prerequisite.getLabel()
+          "android_library target"
               + " cannot be used in the 'resources' attribute as it specifies information (probably"
               + " 'srcs' or 'deps') not directly related to android_resources. Consider moving this"
               + " target from 'resources' to 'deps'.");

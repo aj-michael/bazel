@@ -853,7 +853,7 @@ public final class ApplicationManifest {
     ResourceContainer resourceContainer =
         Iterables.getOnlyElement(
             resourcesPrerequisite
-                .getProvider(AndroidResourcesProvider.class)
+                .get(AndroidResourcesProvider.PROVIDER)
                 .getDirectAndroidResources());
     // It's ugly, but flattening now is more performant given the rest of the checks.
     List<ResourceContainer> resourceContainers =

@@ -176,7 +176,7 @@ public class AndroidSkylarkApiProvider extends SkylarkApiProvider {
   }
 
   private NestedSet<Artifact> collectDirectArtifacts(final ResourceType resources) {
-    AndroidResourcesProvider provider = getInfo().getProvider(AndroidResourcesProvider.class);
+    AndroidResourcesProvider provider = getInfo().get(AndroidResourcesProvider.PROVIDER);
     if (provider == null) {
       return NestedSetBuilder.emptySet(Order.STABLE_ORDER);
     }

@@ -19,6 +19,8 @@ import com.google.devtools.build.lib.analysis.TransitiveInfoProvider;
 import com.google.devtools.build.lib.cmdline.Label;
 import com.google.devtools.build.lib.collect.nestedset.NestedSet;
 import com.google.devtools.build.lib.concurrent.ThreadSafety.Immutable;
+import com.google.devtools.build.lib.packages.NativeInfo;
+import com.google.devtools.build.lib.packages.NativeProvider;
 import com.google.devtools.build.lib.skylarkinterface.SkylarkModule;
 import com.google.devtools.build.lib.skylarkinterface.SkylarkModuleCategory;
 
@@ -30,7 +32,17 @@ import com.google.devtools.build.lib.skylarkinterface.SkylarkModuleCategory;
     category = SkylarkModuleCategory.PROVIDER,
     doc = "A provider for Android manifests, resources and assets."
 )
-public abstract class AndroidResourcesProvider implements TransitiveInfoProvider {
+public abstract class AndroidResourcesProvider extends NativeInfo {
+
+  private static final String SKYLARK_NAME = "AndroidResourcesProvider";
+  static final NativeProvider<AndroidResourcesProvider> PROVIDER =
+      new NativeProvider<AndroidResourcesProvider>(
+          AndroidResourcesProvider.class, SKYLARK_NAME) {};
+
+  AndroidResourcesProvider() {
+    super(PROVIDER);
+  }
+
 
   public static AndroidResourcesProvider create(
       Label label,
@@ -92,6 +104,4 @@ public abstract class AndroidResourcesProvider implements TransitiveInfoProvider
    * TODO(b/30307842): Remove this once android_resources is fully removed.
    */
   public abstract boolean getIsResourcesOnly();
-
-  AndroidResourcesProvider() {}
 }
