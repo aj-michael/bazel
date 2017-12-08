@@ -19,10 +19,17 @@ import com.google.devtools.build.lib.analysis.TransitiveInfoProvider;
 import com.google.devtools.build.lib.cmdline.Label;
 import com.google.devtools.build.lib.collect.nestedset.NestedSet;
 import com.google.devtools.build.lib.concurrent.ThreadSafety.Immutable;
+import com.google.devtools.build.lib.skylarkinterface.SkylarkModule;
+import com.google.devtools.build.lib.skylarkinterface.SkylarkModuleCategory;
 
 /** A provider that supplies ResourceContainers from its transitive closure. */
 @AutoValue
 @Immutable
+@SkylarkModule(
+    name = "AndroidResourcesProvider",
+    category = SkylarkModuleCategory.PROVIDER,
+    doc = "A provider for Android manifests, resources and assets."
+)
 public abstract class AndroidResourcesProvider implements TransitiveInfoProvider {
 
   public static AndroidResourcesProvider create(

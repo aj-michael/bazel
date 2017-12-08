@@ -14,10 +14,19 @@
 package com.google.devtools.build.lib.rules.android;
 
 import com.google.devtools.build.lib.actions.Artifact;
+import com.google.devtools.build.lib.analysis.FileProvider;
+import com.google.devtools.build.lib.analysis.RuleContext;
 import com.google.devtools.build.lib.analysis.config.BuildOptions;
+import com.google.devtools.build.lib.analysis.skylark.SkylarkRuleContext;
+import com.google.devtools.build.lib.collect.nestedset.NestedSetBuilder;
+import com.google.devtools.build.lib.collect.nestedset.Order;
 import com.google.devtools.build.lib.packages.Attribute.SplitTransition;
+import com.google.devtools.build.lib.packages.RuleClass;
+import com.google.devtools.build.lib.rules.java.JavaCommon;
+import com.google.devtools.build.lib.skylarkinterface.Param;
 import com.google.devtools.build.lib.skylarkinterface.SkylarkCallable;
 import com.google.devtools.build.lib.skylarkinterface.SkylarkModule;
+import com.google.devtools.build.lib.syntax.SkylarkList;
 import com.google.devtools.build.lib.vfs.PathFragment;
 
 /**
@@ -50,5 +59,59 @@ public class AndroidSkylarkCommon {
   )
   public SplitTransition<BuildOptions> getAndroidSplitTransition() {
     return AndroidRuleClasses.ANDROID_SPLIT_TRANSITION;
+  }
+
+  @SkylarkCallable(
+      name = "build_resource_apk",
+      doc = "tbd",
+      mandatoryPositionals = 1,
+      parameters = {
+          @Param(
+              name = "manifest",
+              positional = false,
+              named = true,
+              type = Artifact.class,
+              doc = "The Android manifest"
+          ),
+          @Param(
+              name = "resources",
+              positional = false,
+              named = true,
+              type = SkylarkList.class,
+              generic1 = Artifact.class,
+              defaultValue = "[]",
+              doc = "The resources to compile"
+          ),
+          @Param(
+              name = "output",
+              positional = false,
+              named = true,
+              type = Artifact.class
+          )
+      }
+  )
+  public AndroidResourcesProvider buildResourceApk(
+      SkylarkRuleContext skylarkRuleContext,
+      Artifact androidManifest,
+      SkylarkList<Artifact> resources,
+      Artifact outputResourceApk)
+      throws RuleClass.ConfiguredTargetFactory.RuleErrorException, InterruptedException {
+    RuleContext ruleContext = skylarkRuleContext.getRuleContext();
+    ApplicationManifest applicationManifest =
+        ApplicationManifest.fromExplicitManifest(ruleContext, androidManifest);
+    FileProvider resourcesProvider = new FileProvider(
+        new NestedSetBuilder<Artifact>(Order.NAIVE_LINK_ORDER).addAll(resources).build());
+
+    ResourceApk resourceApk =
+        applicationManifest.packAarWithDataAndResources(
+            skylarkRuleContext.getRuleContext(),
+            LocalResourceContainer.forResourceFileProvider(
+                ruleContext, resourcesProvider, "resources"),
+            ResourceDependencies.fromRuleDeps(ruleContext, JavaCommon.isNeverLink(ruleContext)),
+            ruleContext.getImplicitOutputArtifact(AndroidRuleClasses.ANDROID_R_TXT),
+            ruleContext.getImplicitOutputArtifact(AndroidRuleClasses.ANDROID_LOCAL_SYMBOLS),
+            ruleContext.getImplicitOutputArtifact(AndroidRuleClasses.ANDROID_PROCESSED_MANIFEST),
+            outputResourceApk);
+    return resourceApk.toResourceProvider(ruleContext.getLabel(), false);
   }
 }
